@@ -16,40 +16,34 @@ Most RAG tutorials rely on black-box wrappers (`RetrievalQA`, `VectorStoreIndex`
 
 ---
 
+
 ## 🗺️ Progressive Roadmap
 
-Phase 1: Naive Baseline (From Scratch) [CURRENT]
-├── Document Ingestion: Raw .txt, .md, and .pdf via PyMuPDF
-├── Chunking Engine: Sliding-window token/character splitting with overlap
-├── Dense Embeddings: Local bi-encoder (sentence-transformers/all-MiniLM-L6-v2)
-├── Vector Store: In-memory matrix operations with pure NumPy cosine similarity
-└── Prompt Assembler & Generator: Grounded zero-shot context injection
-│
-▼
-Phase 2: Pre-Retrieval Optimization
-├── Structural & Hierarchical Chunking (Parent-Child / Small-to-Big)
-├── Metadata Extraction & Structural Header Tagging
-└── Query Transformations (HyDE - Hypothetical Document Embeddings, Multi-Query)
-│
-▼
-Phase 3: Hybrid Retrieval & Cross-Encoder Reranking
-├── Sparse Lexical Search (BM25 from scratch)
-├── Hybrid Fusion via Reciprocal Rank Fusion (RRF)
-└── Deep Reranking via Cross-Encoder (e.g., bge-reranker-base)
-│
-▼
-Phase 4: Synthesis Hardening & Hallucination Mitigation
-├── Lost-in-the-Middle Attention Mitigation
-├── Structured Citation Extraction
-└── Rejection Fallbacks (Refusal when context confidence is below threshold)
-│
-▼
-Phase 5: End-to-End LLM Evaluation Pipeline
-├── Retrieval Benchmarks: Hit Rate@K, MRR, NDCG@K
-└── Generation Benchmarks: Faithfulness, Answer Relevance, Context Recall
+### Phase 1: Naive Baseline (From Scratch) `[IN PROGRESS]`
+- [ ] **Document Ingestion**: Extract raw `.txt`, `.md`, and `.pdf` via PyMuPDF
+- [ ] **Chunking Engine**: Sliding-window character/token splitting with fixed overlap
+- [ ] **Dense Embeddings**: Local bi-encoder (`sentence-transformers/all-MiniLM-L6-v2`)
+- [ ] **Vector Store**: In-memory matrix operations with pure NumPy cosine similarity
+- [ ] **Generation Pipeline**: Grounded zero-shot context injection
 
+### Phase 2: Pre-Retrieval Optimization
+- [ ] **Hierarchical Chunking**: Parent-Child / Small-to-Big retrieval
+- [ ] **Metadata Enrichment**: Document structure & header hierarchy tagging
+- [ ] **Query Transformations**: HyDE (Hypothetical Document Embeddings) & Multi-Query expansion
 
----
+### Phase 3: Hybrid Search & Cross-Encoder Reranking
+- [ ] **Lexical Retrieval**: BM25 implementation from scratch
+- [ ] **Hybrid Fusion**: Reciprocal Rank Fusion (RRF)
+- [ ] **Reranking**: Deep cross-encoder scoring (`bge-reranker-base`)
+
+### Phase 4: Synthesis Hardening & Hallucination Defense
+- [ ] **Attention Preservation**: Lost-in-the-Middle context rearrangement
+- [ ] **Citation Tracking**: Verifiable chunk-to-sentence attribution
+- [ ] **Negative Abstention**: Confidence-based rejection handling
+
+### Phase 5: End-to-End Evaluation & Benchmarks
+- [ ] **Retrieval Metrics**: Hit Rate@K, MRR@K, NDCG@K
+- [ ] **Generation Metrics**: Faithfulness, Answer Relevance, Context Recall (Ragas / DeepEval)
 
 ## 📂 Repository Layout
 
