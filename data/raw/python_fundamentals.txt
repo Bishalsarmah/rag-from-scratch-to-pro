@@ -1,0 +1,100 @@
+PYTHON PROGRAMMING FUNDAMENTALS, DATA MODEL, AND MEMORY MANAGEMENT
+
+================================================================================
+1. DATA TYPES, VALUE IDENTITY, AND MUTABILITY
+================================================================================
+In Python, everything is a first-class object. Every variable is a named reference
+(pointer) pointing to a PyObject structure allocated on the heap. A PyObject contains
+at minimum an object type identifier, a reference count, and the value representation.
+
+1.1 Immutable Data Types:
+- Numeric: int, float, complex
+- Textual: str
+- Sequences: tuple, frozenset, bytes
+
+Properties:
+- Once an immutable object is instantiated, its state cannot be modified.
+- Operations that appear to mutate an immutable instance (such as string concatenation
+  or slice replacement) create an entirely new PyObject at a different memory location
+  and reassign the reference variable.
+- Small Integer Caching: CPython pre-allocates an array of integer objects for values
+  ranging from -5 to 256 at startup. Any variable assigned an integer in this range
+  points to the exact same shared memory address (`id(a) == id(b)` evaluates to True).
+- String Interning: Python automatically interns compile-time constant string literals
+  that resemble Python identifiers, optimizing dictionary lookups for attribute access.
+
+1.2 Mutable Data Types:
+- Sequences & Containers: list, dict, set, bytearray
+
+Properties:
+- Mutable objects allow in-place mutations without altering the object's identity (`id()`).
+- In shared memory environments or multi-threaded scenarios, modifying mutable objects
+  without synchronization locks introduces data race conditions.
+- Default Mutable Argument Trap: Defining a function with `def append_item(x, target=[])`
+  binds the default list `target` once at module compile time. Subsequent calls mutate
+  the exact same shared list instance across unrelated invocations.
+
+================================================================================
+2. CPYTHON MEMORY ARCHITECTURE AND GARBAGE COLLECTION
+================================================================================
+Memory in CPython is structured hierarchically to minimize system-call overhead:
+- Arenas: 256 KB memory chunks allocated directly from the system heap via malloc.
+- Pools: 4 KB subdivisions within arenas, dedicated to objects of specific size classes.
+- Blocks: Byte-level slots (ranging from 8 bytes up to 512 bytes) inside pools.
+  Objects larger than 512 bytes bypass PyMalloc and are handled directly by system malloc.
+
+CPython combines two complementary garbage collection systems:
+
+2.1 Reference Counting (Primary Real-time System)
+- Every PyObject carries a 64-bit field: `ob_refcnt`.
+- Increment Triggers: Assigning an object to a variable, passing it as a parameter,
+  storing it inside a container (list, dictionary, tuple), or obtaining a reference via sys.
+- Decrement Triggers: A variable going out of scope, a container being cleared, an explicit
+  `del var` call, or overwriting a variable reference.
+- Deallocation: When `ob_refcnt` hits zero, the memory block is immediately reclaimed
+  and made available for future Python allocations without latency spikes.
+
+2.2 Generational Garbage Collection (Cyclic Reference Collector)
+- Reference counting fails on reference cycles:
+  Example: Object A contains a reference to Object B, and Object B contains a reference
+  back to Object A. If all external variables pointing to A and B are dropped, both objects
+  remain stranded with `ob_refcnt == 1`, causing an unrecoverable memory leak.
+- To eliminate orphaned cycles, Python runs a generational garbage collector with three
+  generations: Generation 0 (young objects), Generation 1 (middle-aged), and Generation 2 (long-lived).
+- All newly created objects enter Generation 0.
+- When the number of allocations in Generation 0 exceeds a specified threshold relative
+  to deallocations (checked via `gc.get_threshold()`), a collection sweep runs:
+  1. The GC forms a doubly linked list of candidate objects.
+  2. It temporarily decrements reference counts between objects within the candidate group.
+  3. Objects whose reference counts fall to zero are confirmed unreachable and deallocated.
+  4. Surviving objects are promoted to Generation 1.
+- Generation 2 is swept the least frequently, reducing CPU overhead for stable singletons.
+
+================================================================================
+3. CONCURRENCY: THREADING, MULTIPROCESSING, AND ASYNCIO
+================================================================================
+Python offers three foundational concurrency paradigms, calibrated to different system bottlenecks:
+
+3.1 The Global Interpreter Lock (GIL)
+- The GIL is a mutual exclusion lock implemented in CPython to synchronize internal
+  memory operations and prevent race conditions when altering `ob_refcnt`.
+- Because of the GIL, only one native OS thread can execute Python bytecode at any
+  single point in time within a single Python process, regardless of CPU core count.
+
+3.2 Threading (`threading` module)
+- Uses real OS threads managed by the host kernel scheduler.
+- Ideal For: I/O-bound tasks (network HTTP requests, file system reads, database queries).
+- Mechanics: When a thread performs socket operations or disk I/O, CPython releases the
+  GIL, allowing parallel threads to execute during the wait window.
+
+3.3 Multiprocessing (`multiprocessing` module)
+- Bypasses the GIL entirely by spawning distinct operating system processes.
+- Each process has its own independent Python interpreter, memory space, and GIL.
+- Ideal For: CPU-bound tasks (cryptographic hashing, numeric simulations, matrix calculations).
+- Tradeoffs: Higher memory footprint and inter-process communication (IPC) serialization
+  costs using `pickle` over pipes and queues.
+
+3.4 Asynchronous Concurrency (`asyncio` module)
+- Single-threaded, single-process cooperative multitasking using coroutines and an event loop.
+- Coroutines voluntarily pause execution via `await` when waiting on non-blocking I/O,
+  allowing thousands of concurrent network connections with minimal RAM overhead.

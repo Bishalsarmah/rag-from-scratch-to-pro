@@ -1,0 +1,18 @@
+# Document Ingestion
+pymupdf>=1.24.0
+
+# Vector Math & In-Memory Store
+numpy>=1.26.0
+
+# Local Bi-Encoder Embeddings
+sentence-transformers>=3.0.0
+torch>=2.2.0
+
+# Environment & Config
+python-dotenv>=1.0.0
+
+# LLM Inference for Generator
+groq>=0.9.0
+
+# Testing & Validation
+pytest>=8.0.0
