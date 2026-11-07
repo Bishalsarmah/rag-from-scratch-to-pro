@@ -29,18 +29,19 @@ class DocumentLoader:
             document = Document(page_content= text, metadata=metadata)
             return [document]
     def _load_pdf_file(self,file_path):
-        with pymupdf.open(file_path) as pdf
-        documents = []
+        with pymupdf.open(file_path) as pdf:
+            documents = []
         pages = len(pdf)
         for page in range(pages):
             text = pdf[page].get_text()
+            if not text.strip():  #for empty
+                continue
             metadata = {"source" : str(file_path),
                                 "filename": file_path.name,
                                 "page" : page + 1,
                                 "total_pages" : pages}
             document = Document(page_content=text, metadata=metadata)
             documents.append(document)
-        pdf.close()
         return documents
         
         
